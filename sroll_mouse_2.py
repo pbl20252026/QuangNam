@@ -2,14 +2,6 @@ import cv2
 import mediapipe as mp
 import pyautogui # Thư viện điều khiển chuột
 
-# --- CẤU HÌNH ---
-# Độ nhạy của cuộn (số càng lớn cuộn càng nhanh)
-SCROLL_SPEED = 50 
-# Ngưỡng vùng trên (0.0 - 1.0): Tay cao hơn mức này thì cuộn lên
-UP_THRESHOLD = 0.3 
-# Ngưỡng vùng dưới (0.0 - 1.0): Tay thấp hơn mức này thì cuộn xuống
-DOWN_THRESHOLD = 0.7
-
 # --- KHỞI TẠO ---
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -58,14 +50,14 @@ with mp_hands.Hands(
         if y_pos < 0.3:
             # Nếu ngón tay ở vùng TRÊN -> Cuộn LÊN
             print("Lên!")
-            pyautogui.scroll(SCROLL_SPEED) #dùng để sroll giá trị ở trong là để chỉnh tốc độ, hiểu giống như vector vận tốc, duong thì đi lên, còn âm thì đi xuống
+            pyautogui.scroll(50) #dùng để sroll giá trị ở trong là để chỉnh tốc độ, hiểu giống như vector vận tốc, duong thì đi lên, còn âm thì đi xuống
             cv2.putText(image, "LEN", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             
         elif y_pos > 0.7:
             # Nếu ngón tay ở vùng DƯỚI -> Cuộn XUỐNG
             # Lưu ý: scroll số âm là đi xuống
             print("Xuống!")
-            pyautogui.scroll(-SCROLL_SPEED)  #dùng để sroll giá trị ở trong là để chỉnh tốc độ, hiểu giống như vector vận tốc, duong thì đi lên, còn âm thì đi xuống
+            pyautogui.scroll(-50)  #dùng để sroll giá trị ở trong là để chỉnh tốc độ, hiểu giống như vector vận tốc, duong thì đi lên, còn âm thì đi xuống
             cv2.putText(image, "XUONG", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         
         else:
