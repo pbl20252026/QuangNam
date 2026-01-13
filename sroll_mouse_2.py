@@ -84,3 +84,25 @@ with mp_hands.Hands(
 
 cap.release()
 cv2.destroyAllWindows()
+
+
+
+"""
+--------------HƯỚNG DẪN SỬ DỤNG---------------
+Công cụ này cho phép bạn lướt Web, đọc tài liệu mà không cần chạm vào chuột, chỉ cần dùng ngón tay trước Camera.
+
+1. Cách Khởi Động
+Bước 1: Mở chương trình (Chạy file main.py).
+Bước 2: Đợi khoảng 3-5 giây để Camera bật lên.
+Bước 3: QUAN TRỌNG: Dùng chuột thật Click 1 lần vào cửa sổ bạn muốn điều khiển (Ví dụ: Trình duyệt Chrome, Youtube, file Word...).
+Lưu ý: Nếu không click vào, máy tính sẽ không biết bạn muốn cuộn trang nào.
+
+2. Giao Diện Điều Khiển
+Trên màn hình Camera sẽ xuất hiện 2 đường kẻ ngang chia màn hình làm 3 vùng:
+Vùng Trên (Trên vạch Xanh): Vùng cuộn lên.
+Vùng Giữa: Vùng nghỉ (an toàn).
+Vùng Dưới (Dưới vạch Đỏ): Vùng cuộn xuống.
+
+
+Nhấn Esc trên bàn phím để xóa 
+"""
