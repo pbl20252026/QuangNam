@@ -103,6 +103,5 @@ Vùng Trên (Trên vạch Xanh): Vùng cuộn lên.
 Vùng Giữa: Vùng nghỉ (an toàn).
 Vùng Dưới (Dưới vạch Đỏ): Vùng cuộn xuống.
 
-
 Nhấn Esc trên bàn phím để xóa 
 """
