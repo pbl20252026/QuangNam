@@ -6,15 +6,15 @@ import numpy
 import time
 
 # Hằng số cho scroll chuột 
-SCROLL_SPEED=50
 Pos_y=0
-SD=0.2  #safe distance
-
+Sensitivity_scroll=0.25
+accumulator = 0.0
 #biến số thời gian
 last_time=0
 min_time=0.5
 status_scroll=False
 
+#------ Các tham số chuột--------
 #kiểu sẽ cho chuột đầm và chống rung 
 Smooth=5
 
@@ -22,6 +22,8 @@ Smooth=5
 CLX,CLY=0 ,0       # Current Location
 # biến lưu giá trị trước đó
 PLX,PLY=0 ,0       # Previous Location
+#""""
+
 
 #phạm vi hoạt động 
 frame_r=100 # tức tạo cái khung nhỏ hơn khung image cũ 100frame
@@ -33,13 +35,9 @@ mp_draw_style=mp.solutions.drawing_styles
 
 
 #Lấy tỉ lệ màn hình bạn sử dụng
-screen_w,screen_h=pyautogui.size()
+screen_w,screen_h=1920,1080
 
 
-#_______Viết Hàm_____________________
-    
-
-#hàm lưu biến y của ngón trỏ      
 
 cap = cv2.VideoCapture(0)
 print ("khởi động camera... !")
@@ -75,7 +73,6 @@ with mp_hands.Hands(
                 lm_tro=hand_landmarks.landmark[8]
                 lm_cai=hand_landmarks.landmark[4]
                 lm_giua=hand_landmarks.landmark[12]
-                lm_ap_ut=hand_landmarks.landmark[16]
                 
                 #tính tỉ lệ các điểm
                 x0, y0 = int(hand_landmarks.landmark[0].x * w), int(hand_landmarks.landmark[0].y * h)
@@ -96,50 +93,70 @@ with mp_hands.Hands(
                         last_time=time.time()
                         if (status_scroll):
                             print ("Khởi động chế độ scroll...!")
-                            pos_y=lm_tro.y
+                            Pos_y=lm_tro.y * screen_h
+                            accumulator=0
                         else:
                             print ("tắt chế độ scroll...!")
                         
                 
                 
+                
+                
+                #------------ thao tác di chuột-------------------
+                #tính độ dịch chuyển ước tính
+                real_X=numpy.interp(lm_tro.x * w,(frame_r,w-frame_r),(0,screen_w))
+                real_y=numpy.interp(lm_tro.y * h,(frame_r,h-frame_r),(0,screen_h))
+                #tính quãng đường thực tế 
+                CLX=CLX + (real_X-PLX)/Smooth
+                CLY=CLY + (real_y-PLY)/Smooth
+                #điều khiển chuột đến địa chỉ mới
                 if not status_scroll:
                     cv2.rectangle(image, (frame_r, frame_r), (w - frame_r, h - frame_r), (255, 0, 255), 2)
-                    #------------ thao tác di chuột-------------------
-                    #tính độ dịch chuyển ước tính
-                    real_X=numpy.interp(lm_tro.x * w,(frame_r,w-frame_r),(0,screen_w))
-                    real_y=numpy.interp(lm_tro.y * h,(frame_r,h-frame_r),(0,screen_h))
+                    pyautogui.moveTo(CLX,CLY)
+
+                        
+                # cập nhật lại vị trí cũ thành vị trí hiện tại
+                PLX=CLX 
+                PLY=CLY
+
+               
+                # Biến tính lượng scroll cần thiết
+                speed=0
+
+                # -------------Thao tác scroll chuột-------------------
+                if status_scroll and not (Pos_y<250 or Pos_y>800):
+                    pos_up=Pos_y-100 
+                    pos_down=Pos_y+100 
                     
-                    #tính quãng đường thực tế 
-                    CLX=CLX + (real_X-PLX)/Smooth
-                    CLY=CLY + (real_y-PLY)/Smooth
-                    try:
-                        pyautogui.moveTo(CLX,CLY)
-                    except:
-                        pass
-                    # cập nhật lại vị trí cũ thành vị trí hiện tại
-                    PLX=CLX 
-                    PLY=CLY
-
-
-                # Thao tác scroll chuột
-                else:
-                    line_y = int(pos_y * h)
-                    cv2.line(image, (0, line_y), (w, line_y), (0, 255, 255), 2)
-                    cv2.line(image, (0, line_y + int(0.2*h)), (w, line_y + int(0.2*h)), (255, 0, 255), 2)
+                    
                     cv2.putText(image, "SCROLL MODE", (50, 80), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 255), 1)
-                    if (lm_tro.y<pos_y):
-                        print ("lên!")
-                        pyautogui.scroll(SCROLL_SPEED)
-                        cv2.putText(image, "UP", (int(0.75 * w), 80), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
-                    elif (lm_tro.y>pos_y+SD):
-                        print ("xuống")
-                        pyautogui.scroll(-SCROLL_SPEED)
-                        cv2.putText(image, "DOWN", (int(0.75 * w), 80), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 255), 2)
+                    #CLY : vị trí hiện tại của trục Y
+                    if (CLY < pos_up):
+                        dist = pos_up - CLY
+                        # Công thức tuyến tính: Khoảng cách * Độ nhạy
+                        speed = (dist * Sensitivity_scroll)
+        
+                        cv2.putText(image, "UP", (480, 80), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
+                    elif (CLY > pos_down):
+                        dist = CLY - pos_down
+                        speed = -(dist * Sensitivity_scroll)  
+
+                        cv2.putText(image, "DOWN", (480, 80), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 255), 2)
                     else :
-                        cv2.putText(image, "SAFE", (int(0.75 * w), 80), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+                        cv2.putText(image, "SAFE", (480, 80), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
                     
+                    #lưu các giá trị lẻ , nhỏ
+                    accumulator+=speed
+                    step=int(accumulator)
+                    if step!=0:
+                        pyautogui.scroll(step)
+                        accumulator-=step
+                        if speed == 0:
+                            accumulator= 0
                 #--------------------------Kết thúc thao tác di chuột--------------------------------
-        cv2.imshow('Smooth Mouse AI', image)
+                
+        
+        cv2.imshow('Scroll', image)
         if cv2.waitKey(1) & 0xFF == 27: break
 
 cap.release()
